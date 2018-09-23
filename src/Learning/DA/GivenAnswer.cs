@@ -13,6 +13,6 @@ namespace Learning.DA
         [Required]
         public Question Question { get; set; }
 
-        public ICollection<QuestionOption> GivenQuestionOptions { get; set; }
+        public ICollection<GivenAnswerToQuestionOption> SelectedQuestionOptions { get; set; }
     }
 }

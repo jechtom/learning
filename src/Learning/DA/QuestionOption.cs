@@ -15,6 +15,6 @@ namespace Learning.DA
 
         public bool IsCorrect { get; set; }
 
-        public ICollection<GivenAnswer> GivenAnswers { get; set; }
+        public ICollection<GivenAnswerToQuestionOption> GivenAnswers { get; set; }
     }
 }
