@@ -30,6 +30,17 @@ namespace Learning.Web
             services.AddDbContext<AppDbContext>(options =>
                 options.UseSqlServer(Configuration.GetConnectionString("AppDbContext")));
 
+            services.AddHttpsRedirection(o =>
+            {
+                // for some reason ASP.NET Core didn't recognized HTTPS port automatically so it will not redirect to HTTPS
+                // we can specify it manually
+                // more info: https://github.com/aspnet/Announcements/issues/301
+                if (int.TryParse(Configuration["HttpsPortExplicit"], out int port))
+                {
+                    o.HttpsPort = port;
+                }
+            });
+
             // In production, the Angular files will be served from this directory
             services.AddSpaStaticFiles(configuration =>
             {
