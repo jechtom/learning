@@ -1,0 +1,4 @@
+/Properties/launchSettings.json
+
+# Connection strings
+/appsettings.user.json
