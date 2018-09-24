@@ -2,7 +2,6 @@
 {
     public enum QuestionType
     {
-        SingleAnswer = 1,
-        MultipleAnswers = 2
+        PredefinedAnswers = 1
     }
 }

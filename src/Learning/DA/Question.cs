@@ -7,6 +7,9 @@ namespace Learning.DA
     {
         public int Id { get; set; }
 
+        [Required]
+        public string ExternalId { get; set; }
+
         public QuestionsGroup QuestionsGroup { get; set; }
 
         [Required]

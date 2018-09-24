@@ -1,0 +1,9 @@
+<div class="form-group">
+  <label for="token">Token</label>
+  <input type="email" class="form-control" id="token" placeholder="Token" [(ngModel)]="state.token">
+</div>
+<div class="form-group">
+  <label for="name">Name</label>
+  <input type="text" class="form-control" id="name" placeholder="Name" [(ngModel)]="state.name">
+</div>
+<button type="submit" class="btn btn-default" (click)="save()">Save</button>
