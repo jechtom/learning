@@ -1,6 +1,6 @@
 import { Component } from '@angular/core';
 import { StateService } from '../state.service';
-import { Question } from '../dtos';
+import { Question, QuestionGroup, Option } from '../dtos';
 
 @Component({
   selector: 'app-home',
@@ -20,5 +20,9 @@ export class HomeComponent {
   selectQuestion(q: Question, index: number) {
     this.Question = q;
     this.QuestionIndex = index;
+  }
+
+  toggleAnswer(q: Option) {
+    q.isSelected = !q.isSelected;
   }
 }
