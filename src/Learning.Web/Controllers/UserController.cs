@@ -54,7 +54,9 @@ namespace Learning.Web.Controllers
                     GroupItems = qg.Questions.Select(q => new
                     {
                         Question = q,
-                        Answer = _context.GivenAnswers.SingleOrDefault(ga => ga.Owner == token && ga.Question.Id == q.Id)
+                        Answer = _context.GivenAnswers
+                            .Include(ga => ga.SelectedQuestionOptions)
+                            .SingleOrDefault(ga => ga.Owner == token && ga.Question.Id == q.Id)
                     })
                 })
                 .ToArray()
@@ -69,6 +71,7 @@ namespace Learning.Web.Controllers
                         Options = q.Question.Options.Select(o => new
                         {
                             Content = o.Content,
+                            IsSelected = q.Answer != null && q.Answer.SelectedQuestionOptions.Any(sqo => sqo.QuestionOptionId == o.Id),
                             Id = o.Id
                         }).OrderBy(o => Guid.NewGuid()).ToArray()
                     })

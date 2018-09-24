@@ -8,7 +8,7 @@ import { StateService } from '../state.service';
 })
 export class NavMenuComponent {
 
-  constructor(private state: StateService) { }
+  constructor(public state: StateService) { }
 
   isExpanded = false;
 

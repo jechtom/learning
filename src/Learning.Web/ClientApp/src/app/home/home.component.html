@@ -17,7 +17,7 @@
   <h1>Answers</h1>
   <ul class="list-group">
     <li class="list-group-item" [ngClass]="{'list-group-item-warning': opt.isSelected}" *ngFor="let opt of Question.options">
-      <div class="checkbox" *ngIf="Question.canAnswer">
+      <div class="checkbox" [ngClass]="{'disabled':!Question.canAnswer}">
         <label>
           <input type="checkbox" [(ngModel)]="opt.isSelected"> Select Answer
         </label>
