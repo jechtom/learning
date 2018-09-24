@@ -12,6 +12,8 @@ export class Question {
   id: number;
   options: Option[];
   canAnswer: boolean;
+  isAnswered: boolean;
+  isCorrect: boolean;
 }
 
 export class Option {

@@ -1,30 +1,37 @@
-<div class="btn-group" role="group" aria-label="Button group with nested dropdown">
-  <button type="button" class="btn btn-default" (click)="refreshStatus()">Refresh</button>
-  <div class="btn btn-disabled" *ngIf="state.questionGroups.length == 0">No questions</div>
-  <ng-container *ngFor="let grp of state.questionGroups">
+<div class="btn-toolbar" role="toolbar">
+  <div class="btn-group mr-2" role="group">
+    <button type="button" class="btn btn-default" (click)="refreshStatus()">Refresh</button>
+  </div>
+  <div class="btn-group mr-2" role="group">
+    <div class="btn btn-disabled" *ngIf="state.questionGroups.length == 0">No questions</div>
+  </div>
+  <div class="btn-group mr-2" role="group" *ngFor="let grp of state.questionGroups">
+    <button type="button" class="btn btn-secondary" disabled>{{grp.name}}</button>
     <ng-container *ngFor="let q of grp.questions; let i = index">
-      <button type="button" class="btn btn-primary" (click)="selectQuestion(q, i + 1)">{{i + 1}}</button>
+      <button type="button" class="btn btn-primary" [ngClass]="{ 'btn-success': q.isAnswered && q.isCorrect, 'btn-danger': q.isAnswered && !q.isCorrect, 'btn-primary': q.canAnswer, 'btn-primary': !q.isAnswered && !q.canAnswer }" (click)="selectQuestion(q, i + 1)">{{i + 1}}</button>
     </ng-container>
-  </ng-container>
+  </div>
 </div>
 
 
 
-<div *ngIf="Question != null">
-  <h1>Question {{QuestionIndex}}</h1>
-  <markdown [data]="Question.content"></markdown>
-  <hr />
-  <button class="btn btn-danger pull-right" (click)="submitQuestion(Question)">Submit question</button>
-  <h1>Answers</h1>
-  <ul class="list-group">
-    <li class="list-group-item" [ngClass]="{'list-group-item-warning': Question.canAnswer && opt.isSelected, 'list-group-item-success': !Question.canAnswer && opt.isCorrect, 'list-group-item-danger': !Question.canAnswer && !opt.isCorrect}" *ngFor="let opt of Question.options">
-      <div class="label label-success" *ngIf="!Question.canAnswer && opt.isCorrect == opt.isSelected">Correct!</div>
-      <div class="label label-danger" *ngIf="!Question.canAnswer && opt.isCorrect && !opt.isSelected">Should be selected</div>
-      <div class="label label-danger" *ngIf="!Question.canAnswer && !opt.isCorrect && opt.isSelected">Should not be selected</div>
-      <button class="btn btn-large pull-right" [ngClass]="{'disabled':!Question.canAnswer}" (click)="toggleAnswer(opt)">
-        <span class="glyphicon" [ngClass]="{'glyphicon-ok':opt.isSelected, 'glyphicon-unchecked':!opt.isSelected}"></span>
-      </button>
-      <markdown [data]="opt.content"></markdown>
-    </li>
-  </ul>
-</div>
+  <div *ngIf="Question != null">
+    <h1>Question {{QuestionIndex}}</h1>
+    <markdown [data]="Question.content"></markdown>
+    <hr />
+    <button class="btn btn-danger pull-right" (click)="submitQuestion(Question)" [disabled]="IsSending" *ngIf="Question.canAnswer">Submit question</button>
+    <h2 class="label label-danger pull-right" *ngIf="Question.isAnswered && !Question.isCorrect">Not correct</h2>
+    <h2 class="label label-success pull-right" *ngIf="Question.isAnswered && Question.isCorrect">Correct</h2>
+    <h1>Answers</h1>
+    <ul class="list-group">
+      <li class="list-group-item" [ngClass]="{'list-group-item-warning': !Question.isAnswered && opt.isSelected, 'list-group-item-success': Question.isAnswered && opt.isCorrect, 'list-group-item-danger': Question.isAnswered && !opt.isCorrect}" *ngFor="let opt of Question.options">
+        <div class="label label-success" *ngIf="Question.isAnswered && opt.isCorrect == opt.isSelected">Correct!</div>
+        <div class="label label-danger" *ngIf="Question.isAnswered && opt.isCorrect && !opt.isSelected">Should be selected</div>
+        <div class="label label-danger" *ngIf="Question.isAnswered && !opt.isCorrect && opt.isSelected">Should not be selected</div>
+        <button class="btn btn-large pull-right" [disabled]="!Question.canAnswer" (click)="toggleAnswer(opt)">
+          <span class="glyphicon" [ngClass]="{'glyphicon-ok':opt.isSelected, 'glyphicon-unchecked':!opt.isSelected}"></span>
+        </button>
+        <markdown [data]="opt.content"></markdown>
+      </li>
+    </ul>
+  </div>

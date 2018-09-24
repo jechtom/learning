@@ -1,4 +1,5 @@
 ﻿using Learning.DA;
+using Learning.Services;
 using Learning.Web.Models;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -74,8 +75,9 @@ namespace Learning.Web.Controllers
                 .Include($"{nameof(QuestionsGroup.Questions)}")
                 .Include($"{nameof(QuestionsGroup.Questions)}.{nameof(Question.Options)}");
 
+            var sorter = new DeterministicRandomSorter(token.Id);
 
-
+            // fetch data
             var preData = query
                 .Select(qg => new
                 {
@@ -83,37 +85,60 @@ namespace Learning.Web.Controllers
                     GroupItems = qg.Questions.Select(q => new
                     {
                         Question = q,
-                        IsAnswered = _context.GivenAnswers
-                            .Any(ga => ga.Owner == token && ga.Question.Id == q.Id),
-                        AnswersIds = _context.GivenAnswers
-                            .Where(ga => ga.Owner == token && ga.Question.Id == q.Id)
+                        IsAnswered = q.GivenAnswers.Any(ga => ga.Owner == token),
+                        AnswersIds = q.GivenAnswers.Where(ga => ga.Owner == token)
                             .SelectMany(ga => ga.SelectedQuestionOptions.Select(gao => gao.QuestionOptionId))
                             .ToArray()
                     })
                 })
                 .ToArray();
 
+            // agreggate result
              var result = preData.Select(qg => new
                 {
                     Name = qg.Group.Name,
                     Questions = qg.GroupItems.Select(q =>
-                    new {
+                    new QuestionStatusModel()
+                    {
                         Id = q.Question.Id,
                         Content = q.Question.Content,
-                        CanAnswer = !q.IsAnswered,
-                        Options = q.Question.Options.Select(o => new
+                        IsAnswered = q.IsAnswered,
+                        Options = q.Question.Options.Select(o => new QuestionOptionStatusModel
                         {
                             Content = o.Content,
                             IsSelected = q.IsAnswered && q.AnswersIds.Contains(o.Id),
                             IsCorrect = q.IsAnswered && o.IsCorrect,
                             Id = o.Id
-                        }).OrderBy(o => Guid.NewGuid()).ToArray()
+                        }).ToArray()
                     })
                 });
+
+            // sort randomly - but same each time for same user
+            foreach (var item in result.SelectMany(r => r.Questions))
+            {
+                var arrayToShuffle = item.Options;
+                sorter.Shuffle(item.Id, ref arrayToShuffle);
+            }
 
             return Ok(new { Groups = result });
         }
 
+        class QuestionStatusModel
+        {
+            public int Id { get; set; }
+            public string Content { get; set; }
+            public bool CanAnswer => !IsAnswered;
+            public bool IsAnswered { get; set; }
+            public bool IsCorrect => IsAnswered && Options.All(o => o.IsCorrect == o.IsSelected);
+            public QuestionOptionStatusModel[] Options { get; set; }
+        }
 
+        class QuestionOptionStatusModel
+        {
+            public string Content { get; set; }
+            public bool IsCorrect { get; set; }
+            public bool IsSelected { get; set; }
+            public int Id { get; set; }
+        }
     }
 }
