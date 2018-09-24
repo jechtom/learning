@@ -1,29 +1,27 @@
-<button type="submit" class="btn btn-default" (click)="refreshStatus()">Refresh</button>
-<ul class="list-group" *ngIf="state.questionGroups.length > 0">
-  <li class="list-group-item" *ngFor="let grp of state.questionGroups">
-    {{grp.name}} <span class="badge">{{grp.questions.length}}</span>
+<div class="btn-group" role="group" aria-label="Button group with nested dropdown">
+  <button type="button" class="btn btn-default" (click)="refreshStatus()">Refresh</button>
+  <div class="btn btn-disabled" *ngIf="state.questionGroups.length == 0">No questions</div>
+  <ng-container *ngFor="let grp of state.questionGroups">
+    <ng-container *ngFor="let q of grp.questions; let i = index">
+      <button type="button" class="btn btn-primary" (click)="selectQuestion(q, i + 1)">{{i + 1}}</button>
+    </ng-container>
+  </ng-container>
+</div>
 
-    <div>
-      <a href="#" (click)="selectQuestion(q)" class="btn btn-small btn-default" *ngFor="let q of grp.questions; let i = index">
-        {{i}}
-      </a>
-    </div>
 
-  </li>
-</ul>
-<ul class="list-group" *ngIf="state.questionGroups.length == 0">
-  <li class="list-group-item disabled">
-    No questions
-  </li>
-</ul>
-<hr />
+
 <div *ngIf="Question != null">
-  <h1>Question</h1>
+  <h1>Question {{QuestionIndex}}</h1>
   <markdown [data]="Question.content"></markdown>
   <hr />
   <h1>Answers</h1>
   <ul class="list-group">
-    <li class="list-group-item" *ngFor="let opt of Question.options">
+    <li class="list-group-item" [ngClass]="{'list-group-item-warning': opt.isSelected}" *ngFor="let opt of Question.options">
+      <div class="checkbox" *ngIf="Question.canAnswer">
+        <label>
+          <input type="checkbox" [(ngModel)]="opt.isSelected"> Select Answer
+        </label>
+      </div>
       <markdown [data]="opt.content"></markdown>
     </li>
   </ul>

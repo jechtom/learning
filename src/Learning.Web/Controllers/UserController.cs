@@ -45,15 +45,28 @@ namespace Learning.Web.Controllers
                 .Include($"{nameof(QuestionsGroup.Questions)}")
                 .Include($"{nameof(QuestionsGroup.Questions)}.{nameof(Question.Options)}");
 
-            var result = query.ToArray()
+            
+
+            var result = query
                 .Select(qg => new
                 {
-                    Name = qg.Name,
-                    Questions = qg.Questions.Select(q =>
+                    Group = qg,
+                    GroupItems = qg.Questions.Select(q => new
+                    {
+                        Question = q,
+                        Answer = _context.GivenAnswers.SingleOrDefault(ga => ga.Owner == token && ga.Question.Id == q.Id)
+                    })
+                })
+                .ToArray()
+                .Select(qg => new
+                {
+                    Name = qg.Group.Name,
+                    Questions = qg.GroupItems.Select(q =>
                     new {
-                        Id = q.Id,
-                        Content = q.Content,
-                        Options = q.Options.Select(o => new
+                        Id = q.Question.Id,
+                        Content = q.Question.Content,
+                        CanAnswer = q.Answer == null,
+                        Options = q.Question.Options.Select(o => new
                         {
                             Content = o.Content,
                             Id = o.Id

@@ -7,7 +7,7 @@ import { Question } from '../dtos';
   templateUrl: './home.component.html',
 })
 export class HomeComponent {
-  constructor(private state: StateService) { }
+  constructor(public state: StateService) { }
 
   refreshStatus() {
     this.Question = null;
@@ -15,8 +15,10 @@ export class HomeComponent {
   }
 
   public Question: Question = null;
+  public QuestionIndex: number;
 
-  selectQuestion(q: Question) {
+  selectQuestion(q: Question, index: number) {
     this.Question = q;
+    this.QuestionIndex = index;
   }
 }
