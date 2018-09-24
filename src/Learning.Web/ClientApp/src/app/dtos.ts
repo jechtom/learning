@@ -18,6 +18,5 @@ export class Option {
   content: string;
   id: number;
   isSelected: boolean;
-  isFail: boolean;
-  isSuccess: boolean;
+  isCorrect: boolean;
 }

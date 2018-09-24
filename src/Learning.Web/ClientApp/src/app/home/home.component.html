@@ -14,10 +14,13 @@
   <h1>Question {{QuestionIndex}}</h1>
   <markdown [data]="Question.content"></markdown>
   <hr />
-  <button class="btn btn-primary">Answer</button>
+  <button class="btn btn-danger pull-right" (click)="submitQuestion(Question)">Submit question</button>
   <h1>Answers</h1>
   <ul class="list-group">
-    <li class="list-group-item" [ngClass]="{'list-group-item-warning': opt.isSelected}" *ngFor="let opt of Question.options">
+    <li class="list-group-item" [ngClass]="{'list-group-item-warning': Question.canAnswer && opt.isSelected, 'list-group-item-success': !Question.canAnswer && opt.isCorrect, 'list-group-item-danger': !Question.canAnswer && !opt.isCorrect}" *ngFor="let opt of Question.options">
+      <div class="label label-success" *ngIf="!Question.canAnswer && opt.isCorrect == opt.isSelected">Correct!</div>
+      <div class="label label-danger" *ngIf="!Question.canAnswer && opt.isCorrect && !opt.isSelected">Should be selected</div>
+      <div class="label label-danger" *ngIf="!Question.canAnswer && !opt.isCorrect && opt.isSelected">Should not be selected</div>
       <button class="btn btn-large pull-right" [ngClass]="{'disabled':!Question.canAnswer}" (click)="toggleAnswer(opt)">
         <span class="glyphicon" [ngClass]="{'glyphicon-ok':opt.isSelected, 'glyphicon-unchecked':!opt.isSelected}"></span>
       </button>

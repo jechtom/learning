@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import { StatusRefreshDto, QuestionGroup } from './dtos';
+import { StatusRefreshDto, QuestionGroup, Question, Option } from './dtos';
 
 @Injectable()
 export class StateService {
@@ -36,6 +36,14 @@ export class StateService {
       .toPromise()
       .then(l => {
         this.questionGroups = l.groups;
+      });
+  }
+
+  public submitQuestion(id: number, answers: Option[]) {
+    this.http.post<Question>("/user/submit", { Token: this.token, Id: id, Answers: answers })
+      .toPromise()
+      .then(r => {
+        this.refreshStatus();
       });
   }
 

@@ -34,6 +34,35 @@ namespace Learning.Web.Controllers
         }
 
         [HttpPost]
+        public ActionResult Submit([FromBody]SubmitModel model)
+        {
+            var token = _context.Tokens.SingleOrDefault(t => t.Token == model.Token);
+            if (token == null) return BadRequest();
+
+            GivenAnswer answer = _context.GivenAnswers.SingleOrDefault(ga => ga.Owner.Id == token.Id && ga.Question.Id == model.Id);
+            if (answer != null) return BadRequest(); // already answered
+
+            Question question = _context.Questions.Single(q => q.Id == model.Id);
+            int[] answersIds = _context.QuestionOptions.Where(qo => qo.Question.Id == question.Id).Select(qo => qo.Id).ToArray();
+
+            answer = new GivenAnswer()
+            {
+                Question = question,
+                Owner = token,
+                SelectedQuestionOptions = model.Answers.Where(a => a.IsSelected && answersIds.Contains(a.Id))
+                    .Select(a => new GivenAnswerToQuestionOption()
+                    {
+                        QuestionOptionId = a.Id
+                    }).ToList()
+            };
+
+            _context.GivenAnswers.Add(answer);
+            _context.SaveChanges();
+
+            return Ok();
+        }
+
+        [HttpPost]
         public ActionResult Status([FromBody]StatusRequestModel model)
         {
             var token = _context.Tokens.SingleOrDefault(t => t.Token == model.Token);
@@ -45,33 +74,38 @@ namespace Learning.Web.Controllers
                 .Include($"{nameof(QuestionsGroup.Questions)}")
                 .Include($"{nameof(QuestionsGroup.Questions)}.{nameof(Question.Options)}");
 
-            
 
-            var result = query
+
+            var preData = query
                 .Select(qg => new
                 {
                     Group = qg,
                     GroupItems = qg.Questions.Select(q => new
                     {
                         Question = q,
-                        Answer = _context.GivenAnswers
-                            .Include(ga => ga.SelectedQuestionOptions)
-                            .SingleOrDefault(ga => ga.Owner == token && ga.Question.Id == q.Id)
+                        IsAnswered = _context.GivenAnswers
+                            .Any(ga => ga.Owner == token && ga.Question.Id == q.Id),
+                        AnswersIds = _context.GivenAnswers
+                            .Where(ga => ga.Owner == token && ga.Question.Id == q.Id)
+                            .SelectMany(ga => ga.SelectedQuestionOptions.Select(gao => gao.QuestionOptionId))
+                            .ToArray()
                     })
                 })
-                .ToArray()
-                .Select(qg => new
+                .ToArray();
+
+             var result = preData.Select(qg => new
                 {
                     Name = qg.Group.Name,
                     Questions = qg.GroupItems.Select(q =>
                     new {
                         Id = q.Question.Id,
                         Content = q.Question.Content,
-                        CanAnswer = q.Answer == null,
+                        CanAnswer = !q.IsAnswered,
                         Options = q.Question.Options.Select(o => new
                         {
                             Content = o.Content,
-                            IsSelected = q.Answer != null && q.Answer.SelectedQuestionOptions.Any(sqo => sqo.QuestionOptionId == o.Id),
+                            IsSelected = q.IsAnswered && q.AnswersIds.Contains(o.Id),
+                            IsCorrect = q.IsAnswered && o.IsCorrect,
                             Id = o.Id
                         }).OrderBy(o => Guid.NewGuid()).ToArray()
                     })

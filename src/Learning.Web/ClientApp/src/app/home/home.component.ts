@@ -25,4 +25,8 @@ export class HomeComponent {
   toggleAnswer(q: Option) {
     q.isSelected = !q.isSelected;
   }
+
+  submitQuestion(q: Question) {
+    this.state.submitQuestion(q.id, q.options);
+  }
 }
