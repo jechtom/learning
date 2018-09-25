@@ -66,8 +66,9 @@ namespace Learning.Web.Controllers
             questionEntity.Content = questionModel.Question.Single();
 
             var options =
-                questionModel.Bad.Select(b => new { correct = false, content = b })
+                (questionModel.Bad ?? new string[0]).Select(b => new { correct = false, content = b })
                 .Concat(questionModel.Ok.Select(b => new { correct = true, content = b }))
+                .OrderBy(i => Guid.NewGuid())
                 .ToArray();
 
             var notUpdatedOptions = new HashSet<QuestionOption>(questionEntity.Options);
